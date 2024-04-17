@@ -3,6 +3,8 @@ title: "Decoding the Impact: Statistical Analysis of Factors Contributing to NFL
 author: "Vincent Xie"
 toc: true
 number-sections: false
+execute:
+    echo: false
 highlight-style: pygments
 format: 
   html: 
@@ -18,10 +20,14 @@ header-includes:
   - \doublespacing
 ##  docx: default
 ---
+```{python}
+# Packages
+import pandas as pd
+```
 
 # Abstract
 
-This paper investigates the diverse factors that significantly influence the occurrence and characteristics of injuries within the National Football League (NFL). Using a robust dataset encompassing injury records, player activities, and environmental conditions, this research explores the interplay between player positions, play types, game conditions (including weather and surface type), and their relationship to injury occurrences. Employing statistical techniques such as logistic regression, Chi-square tests, and ANOVA, the study seeks to identify significant correlations and causative factors that can inform injury prevention strategies. The goal is to enhance understanding of injury dynamics in professional football and contribute to improved player safety measures. Insights gained may challenge existing assumptions and lead to innovative health strategies in sports management, significantly impacting player care and game integrity.
+This paper investigates the diverse factors that significantly influence the occurrence and characteristics of injuries within the National Football League (NFL). Using a dataset that encompasses injury records, player activities, and environmental conditions, this research explores the interplay between player positions, play types, game conditions (including weather and surface type), and their relationship to injury occurrences. Employing statistical techniques such as logistic regression, Chi-square tests, and ANOVA, the study seeks to identify significant correlations and causative factors that can inform injury prevention strategies. The goal is to enhance understanding of injury dynamics in professional football and contribute to improved player safety measures. Insights gained may challenge existing assumptions and lead to innovative health strategies in sports management, significantly impacting player care and game integrity.
 
 # Introduction
 
@@ -39,7 +45,7 @@ This paper contributes to the existing literature by employing statistical techn
 
 The remainder of this paper is structured as follows:
 
-1. Data Description: This section details the datasets used, sources, variables of interest, and the nature of the data.
+1. Data Description and Cleaning: This section details the datasets used, sources, variables of interest, and the nature of the data. If there are irrelevant variables or emptiness, it will be removed or filled in.
 2. Research Design and Methods: Here, the statistical methods applied in the analysis, such as logistic regression and ANOVA, are discussed along with the rationale behind their use.
 3. Results: This section presents the findings of the study, discussing how various factors correlate with injury occurrences and their implications.
 4. Discussion: Insights and interpretations of the results are discussed, along with their implications for injury prevention strategies in the NFL.
@@ -58,6 +64,47 @@ Preliminary exploratory analysis would involve:
 + Correlation matrices to identify potential relationships between variables such as weather conditions and injury rates.
 
 This structured approach will guide readers through the foundational data used in the study, establishing the groundwork for more detailed statistical analysis and interpretation in subsequent sections of your paper.
+
+Data cleaning is a necessary step to examine whether or not there is incomplete data. 
+
+```{python}
+# Load the datasets
+injury = pd.read_csv('data/InjuryRecord.csv')
+plays = pd.read_csv('data/PlayList.csv')
+
+# Summarize missing data for InjuryRecord.csv
+injury_missing_summary = injury.isnull().sum()
+injury_missing_summary = injury_missing_summary[injury_missing_summary > 0]
+
+# Summarize missing data for PlayList.csv
+playlist_missing_summary = plays.isnull().sum()
+playlist_missing_summary = playlist_missing_summary[playlist_missing_summary > 0]
+
+# Convert the Series to a DataFrame and transpose it for horizontal layout
+injury_missing_df = injury_missing_summary.to_frame().transpose()
+playlist_missing_df = playlist_missing_summary.to_frame().transpose()
+
+
+# Calculate the number of missing data in each column divided by the number of rows for InjuryRecord
+missing_data_ratio_injury = (28) / len(injury)
+
+# Calculate the number of missing data in each column divided by the number of rows for PlayList
+missing_data_ratio_playlist = (16910 + 18691 + 367)/ len(plays)
+
+# Display the DataFrames
+print('InjuryRecord.csv')
+print(injury_missing_df) 
+print('Ratio:', missing_data_ratio_injury)
+print('PlayList.csv')
+print(playlist_missing_df)
+print('Ratio:', missing_data_ratio_playlist)
+```
+
+From `InjuryRecord.csv`, there are only 28 values missing in the `PlayKey` column from the original 105. At 27%, there is a significant amount of missing data entries. However, it would be difficult to fill in the missing entries without using an external dataset. This variable is also within the `PlayList.csv` file so it can be used to fill in the data in `InjuryRecord.csv` (if applicable). 
+
+In `PlayList.csv`, 13% of the data is missing, mainly in `StadiumType`, `Weather`, and `PlayType`. Similar to before, it is difficult to fill in data without an external resource. For now, the models and analysis will use the data available in the files.
+
+
 
 # Methods
 
