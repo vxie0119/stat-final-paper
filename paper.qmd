@@ -1,0 +1,38 @@
+---
+title: "Decoding the Impact: Statistical Analysis of Factors Contributing to NFL Injuries"
+author: "Vincent Xie"
+toc: true
+number-sections: false
+highlight-style: pygments
+format: 
+  html: 
+    code-fold: true
+    html-math-method: katex
+  pdf: 
+    fontsize: 12pt
+    geometry: 
+      - top=30mm
+      - left=20mm
+header-includes:
+  - \usepackage{setspace}
+  - \doublespacing
+##  docx: default
+---
+
+# Abstract
+
+This paper investigates the diverse factors that significantly influence the occurrence and characteristics of injuries within the National Football League (NFL). Using a robust dataset encompassing injury records, player activities, and environmental conditions, this research explores the interplay between player positions, play types, game conditions (including weather and surface type), and their relationship to injury occurrences. Employing statistical techniques such as logistic regression, Chi-square tests, and ANOVA, the study seeks to identify significant correlations and causative factors that can inform injury prevention strategies. The goal is to enhance understanding of injury dynamics in professional football and contribute to improved player safety measures. Insights gained may challenge existing assumptions and lead to innovative health strategies in sports management, significantly impacting player care and game integrity.
+
+# Introduction
+
+
+
+# Data
+
+# Methods
+
+# Simulation
+
+# Application
+
+# Conclusion
