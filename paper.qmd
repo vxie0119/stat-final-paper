@@ -1,7 +1,7 @@
 ---
 title: "Decoding the Impact: Statistical Analysis of Factors Contributing to NFL Injuries"
 author: "Vincent Xie"
-toc: true
+toc: false
 number-sections: false
 execute:
     echo: false
@@ -23,6 +23,8 @@ header-includes:
 ```{python}
 # Packages
 import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
 ```
 
 # Abstract
@@ -104,7 +106,64 @@ From `InjuryRecord.csv`, there are only 28 values missing in the `PlayKey` colum
 
 In `PlayList.csv`, 13% of the data is missing, mainly in `StadiumType`, `Weather`, and `PlayType`. Similar to before, it is difficult to fill in data without an external resource. For now, the models and analysis will use the data available in the files.
 
+# Modeling
 
+```{python}
+# Bar chart for frequency of each injury type in InjuryRecord
+injury_freq = injury['BodyPart'].value_counts()
+plt.figure(figsize=(5, 2))
+injury_freq.plot(kind='bar', color='skyblue')
+plt.title('Frequency of Each Injury')
+plt.xlabel('Body Part')
+plt.ylabel('Frequency')
+plt.show()
+
+# Bar chart for frequency of stadium types in PlayList
+stadium_freq = plays['StadiumType'].value_counts()
+plt.figure(figsize=(8, 4))
+stadium_freq.plot(kind='bar', color='lightgreen')
+plt.title('Frequency of Stadium Types')
+plt.xlabel('Stadium Type')
+plt.ylabel('Frequency')
+plt.show()
+
+# Merge injury_record and playlist on PlayerKey
+merged_data = pd.merge(injury, plays, on='PlayKey', how='inner')
+
+# Calculate the frequency of injuries by roster position
+injury_position_frequency = merged_data['RosterPosition'].value_counts()
+
+# Plotting the frequency of injuries by roster position
+plt.figure(figsize=(8, 4))  # Smaller plot size for better readability
+injury_position_frequency.plot(kind='bar', color='salmon')
+plt.title('Frequency of Injuries by Roster Position')
+plt.xlabel('Roster Position')
+plt.ylabel('Frequency')
+plt.tight_layout()  # Adjust layout to fit elements
+plt.show()
+```
+
+```{python}
+# Merge injury_record and playlist on PlayerKey
+merged_data = pd.merge(injury, plays, on='PlayKey', how='inner')
+
+# Group by 'RosterPosition' and 'BodyPart' and count the occurrences
+injury_by_position = merged_data.groupby(['RosterPosition', 'BodyPart']).size().reset_index(name='Frequency')
+
+# Create a pivot table with 'RosterPosition' as index, 'BodyPart' as columns, and 'Frequency' as values
+pivot_table = injury_by_position.pivot_table(index='RosterPosition', columns='BodyPart', values='Frequency', fill_value=0)
+
+# Convert frequencies to integers
+pivot_table = pivot_table.astype(int)
+
+# Plot a heatmap to visualize the frequency of each type of injury by each position group
+plt.figure(figsize=(14, 8))
+sns.heatmap(pivot_table, annot=True, cmap="viridis")
+plt.title('Frequency of Each Type of Injury by Position Group')
+plt.xlabel('Body Part')
+plt.ylabel('Roster Position')
+plt.show()
+```
 
 # Methods
 
