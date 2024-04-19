@@ -25,6 +25,8 @@ header-includes:
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+import statsmodels.api as sm
+from scipy.stats import chi2_contingency
 ```
 
 # Abstract
@@ -35,7 +37,7 @@ This paper investigates the diverse factors that significantly influence the occ
 
 In the realm of professional sports, particularly within the National Football League (NFL), injuries are an inevitable consequence of high-impact and physically demanding activities. The incidence and severity of these injuries not only affect player health and career longevity but also influence team dynamics and league operations. This study focuses on a comprehensive analysis of various factors that might contribute to the occurrence and nature of injuries, specifically lower body extremities, in the NFL, aiming to identify patterns and potential preventative measures. By identify the preventative measures, athletes can worry less about how injuries during their career will affect their life after. The importance of this research lies not only in enhancing player safety but also in advancing the broader understanding of injury prevention in contact sports.
 
-Prior research in sports medicine and athletic injuries has primarily focused on immediate causes and rehabilitation of injuries. Within the NFL, the annual health and safety reports provide aggregate data on injury types and frequencies, which serve as a baseline for this study. However, there is a lack of comprehensive analysis that integrates environmental conditions, play strategies, and player-specific variables to predict and analyze injury occurrences comprehensively.
+Prior research in sports medicine and athletic injuries has primarily focused on immediate causes and rehabilitation of injuries. Within the NFL, the annual health and safety reports provide aggregate data on injury types and frequencies, which serve as a baseline for this study. However, there is a lack of comprehensive analysis that integrates environmental conditions, play strategies, and player-specific variables to predict and analyze injury occurrences comprehensively. There is also research on how the surface type affects the frequency in lower extremity injuries. The results show a positive correlation between the two factors. This paper will also perform statistical analysis on how specific factors affect the frequency of lower extremity injuries. It may support the claims of prior research or provide new insight on other causes that may contribute to these injuries.
 
 While existing studies have laid a solid foundation in understanding the factors influencing sports injuries, gaps remain in the holistic analysis of how combined factors like weather conditions, playing surface type, player position, and specific play scenarios contribute to the risk and nature of injuries. Most studies have not fully utilized the granular data now available through player tracking technologies and detailed game logs, which can offer deeper insights into the conditions under which injuries most frequently occur.
 
@@ -73,7 +75,9 @@ Data cleaning is a necessary step to examine whether or not there is incomplete 
 # Load the datasets
 injury = pd.read_csv('data/InjuryRecord.csv')
 plays = pd.read_csv('data/PlayList.csv')
+```
 
+```{python}
 # Summarize missing data for InjuryRecord.csv
 injury_missing_summary = injury.isnull().sum()
 injury_missing_summary = injury_missing_summary[injury_missing_summary > 0]
@@ -106,6 +110,16 @@ From `InjuryRecord.csv`, there are only 28 values missing in the `PlayKey` colum
 
 In `PlayList.csv`, 13% of the data is missing, mainly in `StadiumType`, `Weather`, and `PlayType`. Similar to before, it is difficult to fill in data without an external resource. For now, the models and analysis will use the data available in the files.
 
+```{python}
+# Fill missing 'PlayKey' values with 'GameID' concatenated with '-1'
+injury['PlayKey'] = injury.apply(
+    lambda row: f"{row['GameID']}-1" if pd.isnull(row['PlayKey']) else row['PlayKey'],
+    axis=1
+)
+
+# Save the modified dataframe if needed
+injury.to_csv('data/InjuryRecord.csv', index=False)
+```
 # Modeling
 
 ```{python}
@@ -167,8 +181,28 @@ plt.show()
 
 # Methods
 
+```{python}
+# Create a set of unique keys from InjuryRecord which indicates injuries
+injury_keys = set(injury['PlayKey'])
+
+# Create a binary variable in PlayList that indicates whether an injury occurred
+plays['InjuryOccurred'] = plays['PlayKey'].isin(injury_keys).astype(int)
+
+# Create a contingency table of injuries by surface type
+contingency_table = pd.crosstab(plays['InjuryOccurred'], injury['Surface'])
+
+# Perform the Chi-Square test
+chi2, p, dof, expected = chi2_contingency(contingency_table)
+
+print(f"Chi-Square Statistic: {chi2}, p-value: {p}")
+```
+
 # Simulation
 
 # Application
 
 # Conclusion
+
+# Websites for reference
+
++ https://pubmed.ncbi.nlm.nih.gov/30452873/
