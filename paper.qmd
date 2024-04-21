@@ -80,35 +80,42 @@ plays = pd.read_csv('data/PlayList.csv')
 ```{python}
 # Summarize missing data for InjuryRecord.csv
 injury_missing_summary = injury.isnull().sum()
-injury_missing_summary = injury_missing_summary[injury_missing_summary > 0]
+injury_missing_summary = injury_missing_summary[injury_missing_summary > 0].rename('InjuryRecord')
 
 # Summarize missing data for PlayList.csv
 playlist_missing_summary = plays.isnull().sum()
-playlist_missing_summary = playlist_missing_summary[playlist_missing_summary > 0]
+playlist_missing_summary = playlist_missing_summary[playlist_missing_summary > 0].rename('PlayList')
 
-# Convert the Series to a DataFrame and transpose it for horizontal layout
-injury_missing_df = injury_missing_summary.to_frame().transpose()
-playlist_missing_df = playlist_missing_summary.to_frame().transpose()
+# Calculate the ratio of missing data to total entries for each dataset
+missing_data_ratio_injury = (injury_missing_summary.sum() / len(injury)) * 100
+missing_data_ratio_playlist = (playlist_missing_summary.sum() / len(plays)) * 100
 
+# Create a DataFrame from the missing data summaries
+missing_data_summary = pd.DataFrame({
+    'InjuryRecord.csv': injury_missing_summary,
+    'PlayList.csv': playlist_missing_summary
+})
 
-# Calculate the number of missing data in each column divided by the number of rows for InjuryRecord
-missing_data_ratio_injury = (28) / len(injury)
+# Fill NaN values with zero and convert all numeric counts to integers
+missing_data_summary = missing_data_summary.fillna(0).astype(int)
 
-# Calculate the number of missing data in each column divided by the number of rows for PlayList
-missing_data_ratio_playlist = (16910 + 18691 + 367)/ len(plays)
+# Convert all numeric counts to integers (ensures whole numbers)
+missing_data_summary = missing_data_summary.astype(int)
 
-# Display the DataFrames
-print('InjuryRecord.csv')
-print(injury_missing_df) 
-print('Ratio:', missing_data_ratio_injury)
-print('PlayList.csv')
-print(playlist_missing_df)
-print('Ratio:', missing_data_ratio_playlist)
+# Add the ratio of missing data as a new row
+missing_data_summary.loc['Missing Data Ratio (%)'] = [f"{missing_data_ratio_injury:.2f}%", f"{missing_data_ratio_playlist:.2f}%"]
+
+# Transpose the DataFrame for better readability
+missing_data_summary = missing_data_summary.T
+
+# Rename index to indicate it's the file name and adjust column names if needed
+missing_data_summary.index.name = 'File Name'
+
+# Display the DataFrame neatly
+print(missing_data_summary)
 ```
 
-From `InjuryRecord.csv`, there are only 28 values missing in the `PlayKey` column from the original 105. At 27%, there is a significant amount of missing data entries. However, it would be difficult to fill in the missing entries without using an external dataset. This variable is also within the `PlayList.csv` file so it can be used to fill in the data in `InjuryRecord.csv` (if applicable). 
-
-In `PlayList.csv`, 13% of the data is missing, mainly in `StadiumType`, `Weather`, and `PlayType`. Similar to before, it is difficult to fill in data without an external resource. For now, the models and analysis will use the data available in the files.
+From `InjuryRecord.csv`, there are only 28 values missing in the `PlayKey` column from the original 105. At 27%, there is a significant amount of missing data entries. However, it would be difficult to fill in the missing entries without using an external dataset. This variable is also within the `PlayList.csv` file so it can be used to fill in the data in `InjuryRecord.csv` (if applicable). In `PlayList.csv`, 13% of the data is missing, mainly in `StadiumType`, `Weather`, and `PlayType`. Similar to before, it is difficult to fill in data without an external resource. For now, the models and analysis will use the data available in the files.
 
 ```{python}
 # Fill missing 'PlayKey' values with 'GameID' concatenated with '-1'
@@ -118,8 +125,64 @@ injury['PlayKey'] = injury.apply(
 )
 
 # Save the modified dataframe if needed
-injury.to_csv('data/InjuryRecord.csv', index=False)
+injury.to_csv('data/mod_InjuryRecord.csv', index=False)
 ```
+
+For the missing entries in `InjuryRecord.csv`, we can fill in the missing data by formatting the missing values based on the `GameID`. This step allows us to locate the data between each file and determine important factors that contribute to injuries.
+
+```{python}
+# Bar chart for frequency of stadium types in PlayList
+stadium_freq = plays['StadiumType'].value_counts()
+plt.figure(figsize=(8, 4))
+stadium_freq.plot(kind='bar', color='lightgreen')
+plt.title('Frequency of Stadium Types')
+plt.xlabel('Stadium Type')
+plt.ylabel('Frequency')
+plt.show()
+```
+
+This graph models all of the different stadium types that are in the file. Notice how there are many repeats that can be combined. In order to reduce repetitiveness, these values can be cleaned by combining like-values.
+
+```{python}
+# A quick view at the 'StadiumType' unique values to understand the variations
+stadium_types = plays['StadiumType'].unique()
+
+stadium_type_mapping = {
+    'Retr. Roof-Closed': 'Retr. Roof - Closed',
+    'Retr. Roof-Open': 'Retr. Roof - Open',
+    'Outdoor': 'Outdoors',
+    'Ourdoor': 'Outdoors',
+    'Oudoor': 'Outdoors',
+    'Outddors': 'Outdoors',
+    'Outdor': 'Outdoors',
+    'Outside': 'Outdoors',
+    'Heinz Field': 'Outdoors',  # Assuming Heinz Field is always outdoor
+    'Cloudy': 'Outdoors',  # Assuming 'Cloudy' is an outdoor condition and not a stadium type
+    'Indoor': 'Indoors',
+    'Domed': 'Dome',
+    'Domed, closed': 'Dome, closed',
+    'Domed, Open': 'Dome, closed',
+    'Closed Dome': 'Dome, closed',
+    'Retr. Roof Closed': 'Retr. Roof - Closed'
+    # More mappings can be added here based on the actual data
+}
+
+# Standardize the 'StadiumType' column
+plays['StadiumType'] = plays['StadiumType'].replace(stadium_type_mapping)
+
+# Calculate the new frequency of each stadium type
+cleaned_stadium_freq = plays['StadiumType'].value_counts()
+
+# Bar chart for frequency of stadium types in PlayList
+stadium_freq = plays['StadiumType'].value_counts()
+plt.figure(figsize=(8, 4))
+stadium_freq.plot(kind='bar', color='lightgreen')
+plt.title('Frequency of Stadium Types')
+plt.xlabel('Stadium Type')
+plt.ylabel('Frequency')
+plt.show()
+```
+
 # Modeling
 
 ```{python}
@@ -129,15 +192,6 @@ plt.figure(figsize=(5, 2))
 injury_freq.plot(kind='bar', color='skyblue')
 plt.title('Frequency of Each Injury')
 plt.xlabel('Body Part')
-plt.ylabel('Frequency')
-plt.show()
-
-# Bar chart for frequency of stadium types in PlayList
-stadium_freq = plays['StadiumType'].value_counts()
-plt.figure(figsize=(8, 4))
-stadium_freq.plot(kind='bar', color='lightgreen')
-plt.title('Frequency of Stadium Types')
-plt.xlabel('Stadium Type')
 plt.ylabel('Frequency')
 plt.show()
 
@@ -188,13 +242,17 @@ injury_keys = set(injury['PlayKey'])
 # Create a binary variable in PlayList that indicates whether an injury occurred
 plays['InjuryOccurred'] = plays['PlayKey'].isin(injury_keys).astype(int)
 
-# Create a contingency table of injuries by surface type
-contingency_table = pd.crosstab(plays['InjuryOccurred'], injury['Surface'])
+# Ensure 'Surface' column is in the PlayList dataset and check data
+if 'FieldType' not in plays.columns:
+    print("Error: 'FieldType' column is missing from PlayList dataset.")
+else:
+    # Create a contingency table of injuries by surface type
+    contingency_table = pd.crosstab(plays['InjuryOccurred'], plays['FieldType'])
 
-# Perform the Chi-Square test
-chi2, p, dof, expected = chi2_contingency(contingency_table)
+    # Perform the Chi-Square test
+    chi2, p, dof, expected = chi2_contingency(contingency_table)
 
-print(f"Chi-Square Statistic: {chi2}, p-value: {p}")
+    print(f"Chi-Square Statistic: {chi2:.3f}, p-value: {p:.3f}")
 ```
 
 # Simulation
