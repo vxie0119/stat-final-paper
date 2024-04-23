@@ -27,6 +27,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import statsmodels.api as sm
 from scipy.stats import chi2_contingency
+import numpy as np
 ```
 
 # Abstract
@@ -75,6 +76,7 @@ Data cleaning is a necessary step to examine whether or not there is incomplete 
 # Load the datasets
 injury = pd.read_csv('data/InjuryRecord.csv')
 plays = pd.read_csv('data/PlayList.csv')
+new_injury = pd.read_csv('data/mod_InjuryRecord.csv')
 ```
 
 ```{python}
@@ -133,7 +135,7 @@ For the missing entries in `InjuryRecord.csv`, we can fill in the missing data b
 ```{python}
 # Bar chart for frequency of stadium types in PlayList
 stadium_freq = plays['StadiumType'].value_counts()
-plt.figure(figsize=(8, 4))
+plt.figure(figsize=(5, 2))
 stadium_freq.plot(kind='bar', color='lightgreen')
 plt.title('Frequency of Stadium Types')
 plt.xlabel('Stadium Type')
@@ -170,12 +172,15 @@ stadium_type_mapping = {
 # Standardize the 'StadiumType' column
 plays['StadiumType'] = plays['StadiumType'].replace(stadium_type_mapping)
 
+# Save the modified dataframe if needed
+plays.to_csv('data/mod_PlayList.csv', index=False)
+
 # Calculate the new frequency of each stadium type
 cleaned_stadium_freq = plays['StadiumType'].value_counts()
 
 # Bar chart for frequency of stadium types in PlayList
 stadium_freq = plays['StadiumType'].value_counts()
-plt.figure(figsize=(8, 4))
+plt.figure(figsize=(6, 2))
 stadium_freq.plot(kind='bar', color='lightgreen')
 plt.title('Frequency of Stadium Types')
 plt.xlabel('Stadium Type')
@@ -183,11 +188,52 @@ plt.ylabel('Frequency')
 plt.show()
 ```
 
+We can also
+```{python}
+# Define the temperature bins and labels
+bins = [-float('inf'), 50, 60, 70, 80, float('inf')]
+labels = ['Cold', 'Cool', 'Mild', 'Warm', 'Hot']
+
+# Replace the temperature values with categorical labels directly
+plays['Temperature'] = pd.cut(plays['Temperature'], bins=bins, labels=labels)
+
+# Save the modified dataframe if needed
+plays.to_csv('data/mod_PlayList.csv', index=False)
+```
+
+```{python}
+# Mapping function for weather descriptions
+def map_weather(weather):
+    if pd.isna(weather):
+        return 'Unknown'
+    weather = weather.lower()
+    if any(word in weather for word in ['rain', 'showers', 'rainy']):
+        return 'Rain'
+    elif any(word in weather for word in ['overcast', 'cloudy']):
+        return 'Overcast'
+    elif any(word in weather for word in ['clear', 'sunny']):
+        return 'Clear'
+    elif 'snow' in weather:
+        return 'Snow'
+    elif any(word in weather for word in ['indoor', 'indoors', 'controlled climate', 'n/a']):
+        return 'None'
+    return 'Unknown'
+
+# Apply the mapping function to the Weather column
+plays['WeatherCategory'] = plays['Weather'].apply(map_weather)
+
+# Save the modified dataframe if needed
+plays.to_csv('data/mod_PlayList.csv', index=False)
+
+# Verify the changes by displaying the value counts
+plays['WeatherCategory'].value_counts()
+```
+
 # Modeling
 
 ```{python}
 # Bar chart for frequency of each injury type in InjuryRecord
-injury_freq = injury['BodyPart'].value_counts()
+injury_freq = new_injury['BodyPart'].value_counts()
 plt.figure(figsize=(5, 2))
 injury_freq.plot(kind='bar', color='skyblue')
 plt.title('Frequency of Each Injury')
@@ -196,7 +242,7 @@ plt.ylabel('Frequency')
 plt.show()
 
 # Merge injury_record and playlist on PlayerKey
-merged_data = pd.merge(injury, plays, on='PlayKey', how='inner')
+merged_data = pd.merge(new_injury, plays, on='PlayKey', how='inner')
 
 # Calculate the frequency of injuries by roster position
 injury_position_frequency = merged_data['RosterPosition'].value_counts()
@@ -213,7 +259,7 @@ plt.show()
 
 ```{python}
 # Merge injury_record and playlist on PlayerKey
-merged_data = pd.merge(injury, plays, on='PlayKey', how='inner')
+merged_data = pd.merge(new_injury, plays, on='PlayKey', how='inner')
 
 # Group by 'RosterPosition' and 'BodyPart' and count the occurrences
 injury_by_position = merged_data.groupby(['RosterPosition', 'BodyPart']).size().reset_index(name='Frequency')
@@ -237,7 +283,7 @@ plt.show()
 
 ```{python}
 # Create a set of unique keys from InjuryRecord which indicates injuries
-injury_keys = set(injury['PlayKey'])
+injury_keys = set(new_injury['PlayKey'])
 
 # Create a binary variable in PlayList that indicates whether an injury occurred
 plays['InjuryOccurred'] = plays['PlayKey'].isin(injury_keys).astype(int)
@@ -253,6 +299,58 @@ else:
     chi2, p, dof, expected = chi2_contingency(contingency_table)
 
     print(f"Chi-Square Statistic: {chi2:.3f}, p-value: {p:.3f}")
+```
+
+```{}
+# If 'FieldType' is not already coded as 0/1, convert it to numeric codes
+plays['FieldType'] = plays['FieldType'].astype('category').cat.codes
+
+# Filter the DataFrame to include only cases where an injury occurred
+injury_cases = plays[plays['InjuryOccurred'] == 1]
+
+# The independent variable should be 'FieldType', and we add an intercept to it
+X = injury_cases[['FieldType']]  # Assuming 'FieldType' is already coded as 0/1
+X = sm.add_constant(X)  # This adds the intercept
+
+# The dependent variable is 'InjuryOccurred' (though in this subset, it will always be 1)
+y = injury_cases['InjuryOccurred']
+
+# Perform logistic regression
+logit_model = sm.Logit(y, X)
+result = logit_model.fit(maxiter=100)  # Increase the maximum number of iterations
+
+# Display summary results
+print(result.summary())
+```
+
+```{}
+# Convert categorical variables to dummy variables, including 'FieldType', 'RosterPosition', and 'Weather'
+# Be sure to handle missing data first, if any
+plays.dropna(inplace=True)  # This removes any rows with missing data
+plays = pd.get_dummies(plays, columns=['FieldType', 'RosterPosition', 'Weather'], drop_first=True)
+
+# Ensure all columns are of a numeric data type
+for col in plays.columns:
+    if plays[col].dtype == 'object':
+        plays[col] = plays[col].astype('category').cat.codes  # This converts object types to categorical
+
+# Define the dependent and independent variables
+y = plays['InjuryOccurred']
+X = plays.drop('InjuryOccurred', axis=1)
+
+# Add a constant to the independent variable set for the intercept
+X = sm.add_constant(X)
+
+# Convert X and y to numpy arrays, ensuring they are numeric
+X = np.asarray(X, dtype=float)
+y = np.asarray(y, dtype=float)
+
+# Perform logistic regression
+logit_model = sm.Logit(y, X)
+result = logit_model.fit()
+
+# Display summary results
+print(result.summary())
 ```
 
 # Simulation
