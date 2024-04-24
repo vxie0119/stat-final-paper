@@ -28,6 +28,9 @@ import seaborn as sns
 import statsmodels.api as sm
 from scipy.stats import chi2_contingency
 import numpy as np
+import warnings
+
+warnings.filterwarnings('ignore', category=FutureWarning)
 ```
 
 # Abstract
@@ -77,6 +80,7 @@ Data cleaning is a necessary step to examine whether or not there is incomplete 
 injury = pd.read_csv('data/InjuryRecord.csv')
 plays = pd.read_csv('data/PlayList.csv')
 new_injury = pd.read_csv('data/mod_InjuryRecord.csv')
+new_plays = pd.read_csv('data/mod_PlayList.csv')
 ```
 
 ```{python}
@@ -180,7 +184,7 @@ cleaned_stadium_freq = plays['StadiumType'].value_counts()
 
 # Bar chart for frequency of stadium types in PlayList
 stadium_freq = plays['StadiumType'].value_counts()
-plt.figure(figsize=(6, 2))
+plt.figure(figsize=(6, 1))
 stadium_freq.plot(kind='bar', color='lightgreen')
 plt.title('Frequency of Stadium Types')
 plt.xlabel('Stadium Type')
@@ -188,7 +192,16 @@ plt.ylabel('Frequency')
 plt.show()
 ```
 
-We can also
+We can also group the temperatures and weather so make the data set more clean. Otherwise, there will be too many unique values. The labels for temperature are the following:
+
++ Cold: Below 50F
++ Cool: 50F-60F
++ Mild: 61F-70F
++ Warm: 71F-80F
++ Hot: Above 80F
+
+For weather, it has been grouped to `rain`, `overcast`, `clear`, `snow`, and any others were grouped to `None` or `Unknown`.
+
 ```{python}
 # Define the temperature bins and labels
 bins = [-float('inf'), 50, 60, 70, 80, float('inf')]
@@ -202,60 +215,37 @@ plays.to_csv('data/mod_PlayList.csv', index=False)
 ```
 
 ```{python}
-# Mapping function for weather descriptions
 def map_weather(weather):
     if pd.isna(weather):
         return 'Unknown'
     weather = weather.lower()
-    if any(word in weather for word in ['rain', 'showers', 'rainy']):
+    # Broadening the conditions for rain to capture "rainy", "showers", etc.
+    if any(word in weather for word in ['rain', 'showers', 'rainy', 'rain shower']):
         return 'Rain'
+    # Check for overcast and cloudy conditions
     elif any(word in weather for word in ['overcast', 'cloudy']):
         return 'Overcast'
-    elif any(word in weather for word in ['clear', 'sunny']):
+    # Broadening conditions for clear to include "clear", "sunny", etc.
+    elif any(word in weather for word in ['clear', 'sunny', 'sun']):
         return 'Clear'
+    # Check for snow
     elif 'snow' in weather:
         return 'Snow'
-    elif any(word in weather for word in ['indoor', 'indoors', 'controlled climate', 'n/a']):
+    # Indoor conditions
+    elif any(word in weather for word in ['indoor', 'indoors', 'controlled climate', 'n/a', 'none']):
         return 'None'
     return 'Unknown'
 
 # Apply the mapping function to the Weather column
-plays['WeatherCategory'] = plays['Weather'].apply(map_weather)
+plays['Weather'] = plays['Weather'].apply(map_weather)
 
 # Save the modified dataframe if needed
 plays.to_csv('data/mod_PlayList.csv', index=False)
-
-# Verify the changes by displaying the value counts
-plays['WeatherCategory'].value_counts()
 ```
 
 # Modeling
 
-```{python}
-# Bar chart for frequency of each injury type in InjuryRecord
-injury_freq = new_injury['BodyPart'].value_counts()
-plt.figure(figsize=(5, 2))
-injury_freq.plot(kind='bar', color='skyblue')
-plt.title('Frequency of Each Injury')
-plt.xlabel('Body Part')
-plt.ylabel('Frequency')
-plt.show()
-
-# Merge injury_record and playlist on PlayerKey
-merged_data = pd.merge(new_injury, plays, on='PlayKey', how='inner')
-
-# Calculate the frequency of injuries by roster position
-injury_position_frequency = merged_data['RosterPosition'].value_counts()
-
-# Plotting the frequency of injuries by roster position
-plt.figure(figsize=(8, 4))  # Smaller plot size for better readability
-injury_position_frequency.plot(kind='bar', color='salmon')
-plt.title('Frequency of Injuries by Roster Position')
-plt.xlabel('Roster Position')
-plt.ylabel('Frequency')
-plt.tight_layout()  # Adjust layout to fit elements
-plt.show()
-```
+From the collected the data, it is important to visualize the occurrences of injuries, especially the type and by the position. Below is a heat map that shows how many injury occurrences there are based on position. In terms of the most frequent injuries, there are many `Ankle` and `Knee` injuries, specifically in the `Linebacker` and `Wide Receiver` position groups. `Toes` tend to be the least frequent, with this data set only having one instance. This heatmap shows that with the playstyle of the sport, injured players tend to have knee and ankle issues. 
 
 ```{python}
 # Merge injury_record and playlist on PlayerKey
@@ -271,7 +261,7 @@ pivot_table = injury_by_position.pivot_table(index='RosterPosition', columns='Bo
 pivot_table = pivot_table.astype(int)
 
 # Plot a heatmap to visualize the frequency of each type of injury by each position group
-plt.figure(figsize=(14, 8))
+plt.figure(figsize=(5, 2))
 sns.heatmap(pivot_table, annot=True, cmap="viridis")
 plt.title('Frequency of Each Type of Injury by Position Group')
 plt.xlabel('Body Part')
@@ -279,7 +269,109 @@ plt.ylabel('Roster Position')
 plt.show()
 ```
 
+```{python}
+# Given the code snippets provided by the user, we will combine both plots into a single figure with subplots.
+
+# First, let's recreate the datasets based on the previous analysis steps.
+# NOTE: For the purposes of this demonstration, we will assume 'new_injury' and 'new_plays' are the injury_data and playlist_data respectively.
+
+injury_counts = new_injury['Surface'].value_counts()
+injury_percentages = (injury_counts / injury_counts.sum() * 100).round(2)
+
+# Calculate the predominant surface for each game in the playlist data
+predominant_surface_per_game = new_plays.groupby('GameID')['FieldType'].agg(pd.Series.mode).to_frame()
+surface_type_counts = predominant_surface_per_game['FieldType'].apply(lambda x: x[0] if isinstance(x, list) else x).value_counts()
+surface_type_percentages = (surface_type_counts / surface_type_counts.sum() * 100).round(2)
+
+# Set up a figure with two subplots
+fig, axs = plt.subplots(1, 2, figsize=(12, 6))  # Increased figure size for clarity
+
+# Plot for injuries by surface type
+axs[0].bar(injury_counts.index, injury_counts, color='skyblue')
+axs[0].set_title('Number of Injuries by Surface Type')
+axs[0].set_xlabel('Surface Type')
+axs[0].set_ylabel('Number of Injuries')
+axs[0].grid(axis='y', linestyle='--', alpha=0.7)
+
+# Annotate percentages above the bars for the first plot
+for i, v in enumerate(injury_counts):
+    axs[0].text(i, v + 1, f'{injury_percentages.iloc[i]}%', ha='center', va='bottom')
+
+# Plot for number of games played on each surface type
+axs[1].bar(surface_type_counts.index, surface_type_counts, color=['green', 'blue'])
+axs[1].set_title('Number of Games Predominantly Played on Each Surface Type')
+axs[1].set_xlabel('Surface Type')
+axs[1].set_ylabel('Number of Games')
+axs[1].grid(axis='y', linestyle='--', alpha=0.7)
+
+# Annotate percentages above the bars for the second plot
+for i, v in enumerate(surface_type_counts):
+    axs[1].text(i, v + 20, f'{surface_type_percentages.iloc[i]}%', ha='center', va='bottom')
+
+# Set tight layout to prevent overlap
+plt.tight_layout()
+
+# Show the combined plot
+plt.show()
+```
+
+```{python}
+# To reflect the correct recovery time, we need to adjust the data.
+# If there's a '1' in every 'DM' column for a record, the recovery is 42 days.
+# If there are '1's in the first three 'DM' columns, recovery is 28 days, and so on.
+
+# Create a new column that determines the maximum recovery time based on the 'DM' columns
+def determine_recovery(row):
+    if row['DM_M42'] == 1:
+        return '42 Days'
+    if row['DM_M28'] == 1:
+        return '28 Days'
+    if row['DM_M7'] == 1:
+        return '7 Days'
+    if row['DM_M1'] == 1:
+        return '1 Day'
+    return 'Unknown'
+
+new_injury['RecoveryTime'] = new_injury.apply(determine_recovery, axis=1)
+
+# Group by BodyPart and RecoveryTime to count the number of injuries
+recovery_counts = new_injury.groupby(['BodyPart', 'RecoveryTime']).size().unstack(fill_value=0)
+
+# Reorder the columns to match the desired recovery time order
+recovery_counts = recovery_counts[['1 Day', '7 Days', '28 Days', '42 Days']]
+
+# Calculate the percentage of recovery counts for each body part
+recovery_percent = recovery_counts.div(recovery_counts.sum(axis=1), axis=0)
+
+# Create the stacked bar chart with pastel colors
+pastel_colors = ['#77dd77', '#fdfd96', '#84b6f4', '#ffbdbd']  # Pastel colors for green, yellow, blue, and pink respectively
+
+# Plot the stacked bar chart with ordered recovery times
+ax = recovery_percent.plot(kind='bar', stacked=True, figsize=(10, 6), color=pastel_colors)
+
+# Annotate the counts on the bars with contrast adjustment for readability
+for n, x in enumerate([*recovery_counts.index.values]):
+    for (proportion, count, y_loc) in zip(recovery_percent.loc[x],
+                                          recovery_counts.loc[x],
+                                          recovery_percent.loc[x].cumsum()):
+        # To ensure the text is readable, choose a text color with good contrast
+        text_color = 'black'  # Black for contrast on pastel colors
+        if count > 0:  # Only annotate non-zero counts
+            ax.text(x=n, y=y_loc - proportion/2, s=int(count), ha='center', va='center', color=text_color)
+
+ax.figure.gca().yaxis.set_major_formatter(plt.FuncFormatter(lambda x, _: f'{int(x*100)}%'))
+
+plt.title('Proportion of Injury Types by Recovery Time')
+plt.xlabel('Body Part Injured')
+plt.ylabel('Proportion of Total Injuries')
+plt.legend(title='Recovery Time', bbox_to_anchor=(1.04,1), loc="upper left")
+plt.tight_layout()
+plt.show()
+```
+
 # Methods
+
+**Correlation between surface and injury occurrence**
 
 ```{python}
 # Create a set of unique keys from InjuryRecord which indicates injuries
@@ -301,56 +393,76 @@ else:
     print(f"Chi-Square Statistic: {chi2:.3f}, p-value: {p:.3f}")
 ```
 
-```{}
-# If 'FieldType' is not already coded as 0/1, convert it to numeric codes
-plays['FieldType'] = plays['FieldType'].astype('category').cat.codes
+```{python}
+# Merging the datasets on 'PlayerKey', 'GameID', and 'PlayKey'
+merged_data = pd.merge(new_plays, new_injury, how='left', on=['PlayerKey', 'GameID', 'PlayKey'])
 
-# Filter the DataFrame to include only cases where an injury occurred
-injury_cases = plays[plays['InjuryOccurred'] == 1]
+# Adding a binary column for whether an injury occurred
+merged_data['InjuryOccurred'] = merged_data['BodyPart'].notna()
 
-# The independent variable should be 'FieldType', and we add an intercept to it
-X = injury_cases[['FieldType']]  # Assuming 'FieldType' is already coded as 0/1
-X = sm.add_constant(X)  # This adds the intercept
+# Prepare the data for logistic regression
+# We need to convert 'FieldType' into a binary variable for logistic regression
+# Let's assume 'Synthetic' as 1 and 'Natural' as 0
+merged_data['FieldTypeBinary'] = (merged_data['FieldType'] == 'Synthetic').astype(int)
 
-# The dependent variable is 'InjuryOccurred' (though in this subset, it will always be 1)
-y = injury_cases['InjuryOccurred']
+# Dropping rows where 'FieldType' is NaN since we can't use them in the regression
+merged_data_clean = merged_data.dropna(subset=['FieldType'])
 
-# Perform logistic regression
-logit_model = sm.Logit(y, X)
-result = logit_model.fit(maxiter=100)  # Increase the maximum number of iterations
+# Logistic Regression: InjuryOccurred ~ FieldType
+X = merged_data_clean[['FieldTypeBinary']]  # Independent variable
+X = sm.add_constant(X)  # Adding a constant for the intercept term
+y = merged_data_clean['InjuryOccurred']  # Dependent binary variable
 
-# Display summary results
-print(result.summary())
-```
-
-```{}
-# Convert categorical variables to dummy variables, including 'FieldType', 'RosterPosition', and 'Weather'
-# Be sure to handle missing data first, if any
-plays.dropna(inplace=True)  # This removes any rows with missing data
-plays = pd.get_dummies(plays, columns=['FieldType', 'RosterPosition', 'Weather'], drop_first=True)
-
-# Ensure all columns are of a numeric data type
-for col in plays.columns:
-    if plays[col].dtype == 'object':
-        plays[col] = plays[col].astype('category').cat.codes  # This converts object types to categorical
-
-# Define the dependent and independent variables
-y = plays['InjuryOccurred']
-X = plays.drop('InjuryOccurred', axis=1)
-
-# Add a constant to the independent variable set for the intercept
-X = sm.add_constant(X)
-
-# Convert X and y to numpy arrays, ensuring they are numeric
-X = np.asarray(X, dtype=float)
-y = np.asarray(y, dtype=float)
-
-# Perform logistic regression
+# Fit the logistic regression model
 logit_model = sm.Logit(y, X)
 result = logit_model.fit()
 
-# Display summary results
-print(result.summary())
+# Display the summary of the logistic regression
+result.summary()
+
+```
+
+**Weather conditions across different injury types**
+
+```{python}
+# Prepare the data for chi-square test on weather and injury types
+# Drop rows where 'Weather' or 'BodyPart' is NaN since they can't be used in the test
+weather_injury_data = merged_data.dropna(subset=['Weather', 'BodyPart'])
+
+# Create the contingency table for 'Weather' and 'BodyPart'
+contingency_weather_injury = pd.crosstab(weather_injury_data['Weather'], weather_injury_data['BodyPart'])
+
+# Perform the chi-square test
+chi2_weather_injury, p_value_weather_injury, dof_weather_injury, expected_weather_injury = chi2_contingency(contingency_weather_injury)
+
+# Display the chi-square test results and the contingency table (if small enough)
+contingency_weather_injury.shape, (chi2_weather_injury, p_value_weather_injury)
+
+```
+
+**Does temperature affect injury occurrence?**
+
+```{python}
+# Convert temperature categories into numerical codes for logistic regression
+temperature_mapping = {'Cold': 0, 'Cool': 1, 'Mild': 2, 'Warm': 3, 'Hot': 4}
+merged_data['TemperatureCode'] = merged_data['Temperature'].map(temperature_mapping)
+
+# Prepare data for logistic regression
+# Dropping rows where 'TemperatureCode' is NaN
+temperature_injury_data = merged_data.dropna(subset=['TemperatureCode'])
+
+# Logistic Regression: InjuryOccurred ~ Temperature
+X_temp = temperature_injury_data[['TemperatureCode']]  # Independent variable
+X_temp = sm.add_constant(X_temp)  # Adding a constant for the intercept term
+y_temp = temperature_injury_data['InjuryOccurred']  # Dependent binary variable
+
+# Fit the logistic regression model
+logit_model_temp = sm.Logit(y_temp, X_temp)
+result_temp = logit_model_temp.fit()
+
+# Display the summary of the logistic regression
+result_temp.summary()
+
 ```
 
 # Simulation
