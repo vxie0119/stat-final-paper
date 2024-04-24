@@ -30,6 +30,10 @@ from scipy.stats import chi2_contingency
 import numpy as np
 import warnings
 
+from sklearn.cluster import KMeans
+from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
+
 warnings.filterwarnings('ignore', category=FutureWarning)
 ```
 
@@ -419,7 +423,6 @@ result = logit_model.fit()
 
 # Display the summary of the logistic regression
 result.summary()
-
 ```
 
 **Weather conditions across different injury types**
@@ -437,8 +440,9 @@ chi2_weather_injury, p_value_weather_injury, dof_weather_injury, expected_weathe
 
 # Display the chi-square test results and the contingency table (if small enough)
 contingency_weather_injury.shape, (chi2_weather_injury, p_value_weather_injury)
-
 ```
+
+No significant association between weather conditions and types of injuries.
 
 **Does temperature affect injury occurrence?**
 
@@ -462,10 +466,14 @@ result_temp = logit_model_temp.fit()
 
 # Display the summary of the logistic regression
 result_temp.summary()
-
 ```
 
+*Predicts whether or not an injury will occur based on temperature*
+
+Whether the results are hot or cold, both have a significant impact on the chance of injuries. 
+
 # Simulation
+
 
 # Application
 
@@ -474,3 +482,5 @@ result_temp.summary()
 # Websites for reference
 
 + https://pubmed.ncbi.nlm.nih.gov/30452873/
++ https://pubmed.ncbi.nlm.nih.gov/30697503/
++ https://journals.sagepub.com/doi/pdf/10.1177/0363546518808499
