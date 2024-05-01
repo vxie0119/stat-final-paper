@@ -319,6 +319,11 @@ plt.tight_layout()
 plt.show()
 ```
 
+
+The comparison of injury occurrence and the type of playing surface presents a significant finding in the data. There's a higher rate of injuries reported on synthetic surfaces at 54.29%, despite more games being played on natural grass, which hosts 57.97% of games. This discrepancy suggests that synthetic surfaces may carry a higher risk of injury compared to natural grass. This data can inform decisions about player safety and surface selection, potentially leading to considerations for the use of natural grass to reduce injury rates.
+
+Given this data, it appears that the type of playing surface may be a significant contributing factor to injury risks in sports, particularly affecting players in positions that require dynamic movements such as sudden turns and sprints. These insights can inform decisions regarding player training, game scheduling, and perhaps the selection or maintenance of playing surfaces to mitigate injury risks. Further research may be warranted to explore the causative factors behind these observations and to develop strategies for injury prevention.
+
 ```{python}
 # To reflect the correct recovery time, we need to adjust the data.
 # If there's a '1' in every 'DM' column for a record, the recovery is 42 days.
@@ -373,9 +378,20 @@ plt.tight_layout()
 plt.show()
 ```
 
+The provided stacked bar chart illustrates the proportion of injuries categorized by body part and further subdivided by recovery time. The body parts considered are the ankle, foot, heel, knee, and toes. The recovery time is categorized into four distinct time frames: 1 day, 7 days, 28 days, and 42 days.
+
+Observations from the chart include:
+
++ Knee injuries comprise a significant portion of the injuries, with a notable number requiring a recovery time of 28 days, indicating potential severity.
++ Ankle injuries are the second most common and show a varied recovery time, with the majority needing either 1 or 28 days to recover.
++ Foot and heel injuries are less frequent, but foot injuries display a substantial number requiring the longest recovery time of 42 days.
++ Toe injuries are the least common; however, they show a split between short recovery (1 day) and extended recovery (28 days).
+
+The data suggests that knee and ankle injuries are not only frequent but also often require prolonged periods of recovery. The severity indicated by longer recovery times emphasizes the need for targeted preventive measures for these particular body parts. The substantial number of injuries requiring the longest recovery period for both the knee and foot indicates that these injuries may be particularly severe or complex. The analysis of this data can be crucial for healthcare providers, coaches, and sports organizations in understanding injury patterns and implementing strategies for injury prevention and rehabilitation.
+
 # Methods
 
-**Correlation between surface and injury occurrence**
+**Injury Occurrence based on Surface Type**
 
 ```{python}
 # Create a set of unique keys from InjuryRecord which indicates injuries
@@ -397,7 +413,15 @@ else:
     print(f"Chi-Square Statistic: {chi2:.3f}, p-value: {p:.3f}")
 ```
 
+The methods section details a statistical approach to establish a correlation between the type of playing surface and the occurrence of injuries. A binary variable is created within the plays dataset to indicate the occurrence of an injury, with each play cross-referenced against a set of unique injury identifiers from the new_injury dataset.
+
+Following this, a contingency table is constructed to tabulate the frequency of injuries against each type of playing surface, as recorded in the plays dataset. A Chi-Square test of independence is then applied to this contingency table to evaluate if there is a statistically significant association between playing surface type and injury occurrence.
+
+The Chi-Square statistic and corresponding p-value are critical in this analysis. If the p-value is found to be less than a commonly accepted threshold (e.g., 0.05), the null hypothesis — which assumes no relationship between surface type and injury occurrence — is rejected. This suggests that the surface type may indeed play a role in injury risk, an insight that could be instrumental in shaping preventative measures in sports environments.
+
 ```{python}
+# may not be needed
+
 # Merging the datasets on 'PlayerKey', 'GameID', and 'PlayKey'
 merged_data = pd.merge(new_plays, new_injury, how='left', on=['PlayerKey', 'GameID', 'PlayKey'])
 
@@ -442,11 +466,17 @@ chi2_weather_injury, p_value_weather_injury, dof_weather_injury, expected_weathe
 contingency_weather_injury.shape, (chi2_weather_injury, p_value_weather_injury)
 ```
 
-No significant association between weather conditions and types of injuries.
+The Chi-Square test conducted on the contingency table of weather conditions and body parts injured returned a non-significant result, indicating no strong evidence of an association between the two variables within the dataset analyzed. The shape of the contingency table and the values of the Chi-Square statistic and p-value suggest that variations in weather do not statistically affect the likelihood of different types of injuries occurring. This analysis supports the conclusion that, at least in this data set, weather conditions do not appear to be a significant factor in the occurrence of injuries to specific body parts.
 
-**Does temperature affect injury occurrence?**
+**Temperature vs. injury occurrence**
 
 ```{python}
+# Merging the datasets on 'PlayerKey', 'GameID', and 'PlayKey'
+merged_data = pd.merge(new_plays, new_injury, how='left', on=['PlayerKey', 'GameID', 'PlayKey'])
+
+# Adding a binary column for whether an injury occurred
+merged_data['InjuryOccurred'] = merged_data['BodyPart'].notna()
+
 # Convert temperature categories into numerical codes for logistic regression
 temperature_mapping = {'Cold': 0, 'Cool': 1, 'Mild': 2, 'Warm': 3, 'Hot': 4}
 merged_data['TemperatureCode'] = merged_data['Temperature'].map(temperature_mapping)
@@ -468,16 +498,26 @@ result_temp = logit_model_temp.fit()
 result_temp.summary()
 ```
 
-*Predicts whether or not an injury will occur based on temperature*
+The logistic regression analysis presented in the summary focuses on the relationship between temperature and injury occurrence. The model, which predicts the likelihood of an injury based on temperature, uses a temperature code that categorizes weather conditions from cold to hot. The results show that for every unit increase in the temperature code, the log-odds of injury occurrence increases by 0.1384, which is statistically significant with a p-value of 0.038. This suggests that as the temperature category increases from colder to warmer, the probability of injury occurrence slightly increases.
 
-Whether the results are hot or cold, both have a significant impact on the chance of injuries. 
+The model's overall fit, indicated by the pseudo R-squared, is very low, which suggests that the temperature alone does not provide a strong predictive power for the occurrence of injuries. However, the statistical significance of the temperature variable indicates that there is a relationship worthy of further investigation.
 
-# Simulation
-
-
-# Application
+It's important to note that the model controls for temperature but not for other potentially confounding variables. Thus, while temperature has been found to have a significant association with injury occurrence, the exact nature of this relationship and its practical implications would require a more in-depth analysis that includes a broader set of variables.
 
 # Conclusion
+
+The multifaceted analysis presented in this paper provides valuable insights into the factors contributing to injury occurrences within the NFL. Through the use of logistic regression, Chi-square tests, and other statistical methods, the research examined the influence of playing surfaces, weather conditions, and temperature on the likelihood of player injuries.
+
+Key findings indicate that synthetic playing surfaces may have a higher association with injury occurrence compared to natural grass. This data underscores the need for sports leagues to consider playing surface characteristics in their injury prevention strategies. Additionally, while weather conditions did not show a significant association with the types of injuries sustained, temperature did exhibit a measurable impact, suggesting that warmer conditions could potentially increase the probability of injury.
+
+Despite the robustness of the statistical analysis, the conclusions of this study are subject to the limitations of the dataset and the scope of the research methods employed. The predictive power of the models for injury occurrence was relatively low, highlighting the complexity of injury dynamics and the potential influence of unaccounted variables such as player fitness, equipment, and play context.
+
+This research contributes to the body of knowledge in sports medicine and injury prevention by highlighting the importance of environmental and situational factors in the occurrence of NFL injuries. The findings provide a foundation for further research to explore additional variables and employ more sophisticated models that can account for the intricate nature of sports injuries.
+
+As the NFL continues to evolve with advances in technology and player tracking, there will be opportunities to refine injury prevention strategies further. Continuous investment in data analytics and research will enable the development of tailored interventions, improve player safety, and enrich the overall quality of the sport.
+
+In conclusion, this paper not only corroborates some established understandings but also opens new avenues for inquiry into the environmental factors affecting NFL injuries. It prompts a re-evaluation of current practices and policies related to playing surfaces and game conditions, with the ultimate goal of reducing the incidence and severity of injuries for the welfare of athletes.
+
 
 # Websites for reference
 
