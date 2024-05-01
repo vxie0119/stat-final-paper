@@ -1,7 +1,7 @@
 ---
 title: "Decoding the Impact: Statistical Analysis of Factors Contributing to NFL Injuries"
 author: "Vincent Xie"
-bibliography: bibliography.bib
+bibliography: references.bib
 toc: false
 number-sections: false
 execute:
@@ -42,15 +42,17 @@ warnings.filterwarnings('ignore', category=FutureWarning)
 
 This paper investigates the diverse factors that significantly influence the occurrence and characteristics of injuries within the National Football League (NFL). Using a dataset that encompasses injury records, player activities, and environmental conditions, this research explores the interplay between player positions, play types, game conditions (including weather and surface type), and their relationship to injury occurrences. Employing statistical techniques such as logistic regression, Chi-square tests, and ANOVA, the study seeks to identify significant correlations and causative factors that can inform injury prevention strategies. The goal is to enhance understanding of injury dynamics in professional football and contribute to improved player safety measures. Insights gained may challenge existing assumptions and lead to innovative health strategies in sports management, significantly impacting player care and game integrity.
 
+**Keywords**: environmental factors; lower extremity; natural turf; NFL injuries; stadium surface; synthetic turf
+
 # Introduction
 
 In the realm of professional sports, particularly within the National Football League (NFL), injuries are an inevitable consequence of high-impact and physically demanding activities. The incidence and severity of these injuries not only affect player health and career longevity but also influence team dynamics and league operations. This study focuses on a comprehensive analysis of various factors that might contribute to the occurrence and nature of injuries, specifically lower body extremities, in the NFL, aiming to identify patterns and potential preventative measures. By identify the preventative measures, athletes can worry less about how injuries during their career will affect their life after. The importance of this research lies not only in enhancing player safety but also in advancing the broader understanding of injury prevention in contact sports.
 
-Prior research in sports medicine and athletic injuries has primarily focused on immediate causes and rehabilitation of injuries. Within the NFL, the annual health and safety reports provide aggregate data on injury types and frequencies, which serve as a baseline for this study. However, there is a lack of comprehensive analysis that integrates environmental conditions, play strategies, and player-specific variables to predict and analyze injury occurrences comprehensively. There is also research on how the surface type affects the frequency in lower extremity injuries. The results show a positive correlation between the two factors. This paper will also perform statistical analysis on how specific factors affect the frequency of lower extremity injuries. It may support the claims of prior research or provide new insight on other causes that may contribute to these injuries.
+Prior research in sports medicine and athletic injuries has primarily focused on immediate causes and rehabilitation of injuries. Within the NFL, the annual health and safety reports provide aggregate data on injury types and frequencies, which serve as a baseline for this study. However, there is a lack of comprehensive analysis that integrates environmental conditions, play strategies, and player-specific variables to predict and analyze injury occurrences comprehensively. There is also research on how the surface type affects the frequency in lower extremity injuries. The results from @Mack2018 show a positive correlation between the two factors. Notably, there was a 16% increase in lower extremity injuries on synthetic fields. @Haider2018 did another study on concussions and how it was affected by environmental factors. Although not related to this paper, it highlights the idea that environmental factors such as temperature and weather are impactful in regards to injuries.
 
 While existing studies have laid a solid foundation in understanding the factors influencing sports injuries, gaps remain in the holistic analysis of how combined factors like weather conditions, playing surface type, player position, and specific play scenarios contribute to the risk and nature of injuries. Most studies have not fully utilized the granular data now available through player tracking technologies and detailed game logs, which can offer deeper insights into the conditions under which injuries most frequently occur.
 
-This paper contributes to the existing literature by employing statistical techniques to analyze a unique dataset combining player injury records, play-by-play data, and environmental conditions. By doing so, it aims to:
+This paper contributes to the existing literature by employing statistical techniques to analyze a unique dataset combining player injury records, play-by-play data, and environmental conditions. By examining the frequency of lower extremity injuries, it may support the claims of prior research. By doing so, it aims to:
 
 + Quantify the impact of various factors on the likelihood and severity of injuries.
 + Identify specific conditions or scenarios that significantly increase injury risk.
@@ -491,37 +493,3 @@ In conclusion, this paper not only corroborates some established understandings 
 
 
 # References
-
-@article{Mack2018,
-  author = {Mack, Callie D. and Solomon, Gary and Covassin, Tracey and Theodore, Nicholas and Cárdenas, Javier and Sills, Allen},
-  title = {Higher Rates of Lower Extremity Injury on Synthetic Turf Compared With Natural Turf Among National Football League Athletes: Epidemiological Confirmation of a Biomechanical Hypothesis},
-  journal = {American Journal of Sports Medicine},
-  year = {2018},
-  volume = {46},
-  number = {12},
-  pages = {2781--2789},
-  doi = {10.1177/0363546518808499}
-}
-
-@article{Haider2018,
-  author = {Haider, Syed and Kaye-Kauderer, Halley P. and Maniya, Akbar Y. and Dai, Jennifer B. and Li, Adam Y. and Post, Alexander F. and Sobotka, Stanislaw S. and Adams, Ryan and Gometz, Alex and Lovell, Mark R. and Choudhri, Tanvir F.},
-  title = {Does the Environment Influence the Frequency of Concussion Incidence in Professional Football?},
-  journal = {Cureus},
-  year = {2018},
-  volume = {10},
-  number = {11},
-  pages = {e3627},
-  doi = {10.7759/cureus.3627}
-}
-
-@article{SAGEArticle2018,
-  author = {Author Names},
-  title = {Title of the SAGE Journal Article},
-  journal = {Journal Name},
-  year = {2018},
-  volume = {Volume Number},
-  number = {Issue Number},
-  pages = {Page Range},
-  doi = {DOI if available}
-}
-
