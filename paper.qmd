@@ -419,36 +419,6 @@ Following this, a contingency table is constructed to tabulate the frequency of 
 
 The Chi-Square statistic and corresponding p-value are critical in this analysis. If the p-value is found to be less than a commonly accepted threshold (e.g., 0.05), the null hypothesis — which assumes no relationship between surface type and injury occurrence — is rejected. This suggests that the surface type may indeed play a role in injury risk, an insight that could be instrumental in shaping preventative measures in sports environments.
 
-```{python}
-# may not be needed
-
-# Merging the datasets on 'PlayerKey', 'GameID', and 'PlayKey'
-merged_data = pd.merge(new_plays, new_injury, how='left', on=['PlayerKey', 'GameID', 'PlayKey'])
-
-# Adding a binary column for whether an injury occurred
-merged_data['InjuryOccurred'] = merged_data['BodyPart'].notna()
-
-# Prepare the data for logistic regression
-# We need to convert 'FieldType' into a binary variable for logistic regression
-# Let's assume 'Synthetic' as 1 and 'Natural' as 0
-merged_data['FieldTypeBinary'] = (merged_data['FieldType'] == 'Synthetic').astype(int)
-
-# Dropping rows where 'FieldType' is NaN since we can't use them in the regression
-merged_data_clean = merged_data.dropna(subset=['FieldType'])
-
-# Logistic Regression: InjuryOccurred ~ FieldType
-X = merged_data_clean[['FieldTypeBinary']]  # Independent variable
-X = sm.add_constant(X)  # Adding a constant for the intercept term
-y = merged_data_clean['InjuryOccurred']  # Dependent binary variable
-
-# Fit the logistic regression model
-logit_model = sm.Logit(y, X)
-result = logit_model.fit()
-
-# Display the summary of the logistic regression
-result.summary()
-```
-
 **Weather conditions across different injury types**
 
 ```{python}
