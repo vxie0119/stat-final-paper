@@ -40,17 +40,18 @@ warnings.filterwarnings('ignore', category=FutureWarning)
 
 # Abstract
 
-This paper investigates the diverse factors that significantly influence the occurrence and characteristics of injuries within the National Football League (NFL). Using a dataset that encompasses injury records, player activities, and environmental conditions, this research explores the interplay between player positions, play types, game conditions (including weather and surface type), and their relationship to injury occurrences. Employing statistical techniques such as logistic regression, Chi-square tests, and ANOVA, the study seeks to identify significant correlations and causative factors that can inform injury prevention strategies. The goal is to enhance understanding of injury dynamics in professional football and contribute to improved player safety measures. Insights gained may challenge existing assumptions and lead to innovative health strategies in sports management, significantly impacting player care and game integrity.
+This paper investigates the diverse factors that significantly influence the occurrence and characteristics of injuries within the National Football League (NFL). Using a dataset that encompasses injury records, player activities, and environmental conditions, this research explores the interplay between player positions, play types, game conditions (including weather and surface type), and their relationship to injury occurrences. Employing statistical techniques such as logistic regression, Chi-square tests, and data visualization, the study seeks to identify significant correlations and causative factors that can inform injury prevention strategies. The goal is to enhance understanding of injury dynamics in professional football and contribute to improved player safety measures. Insights gained may challenge existing assumptions and lead to innovative health strategies in sports management, significantly impacting player care and game integrity.
 
-**Keywords**: environmental factors; lower extremity; natural turf; NFL injuries; stadium surface; synthetic turf
+**Keywords**: environmental factors; lower extremity; natural turf; NFL injuries; stadium surface; synthetic turf.
 
 # Introduction
 
-In the realm of professional sports, particularly within the National Football League (NFL), injuries are an inevitable consequence of high-impact and physically demanding activities. The incidence and severity of these injuries not only affect player health and career longevity but also influence team dynamics and league operations. This study focuses on a comprehensive analysis of various factors that might contribute to the occurrence and nature of injuries, specifically lower body extremities, in the NFL, aiming to identify patterns and potential preventative measures. By identify the preventative measures, athletes can worry less about how injuries during their career will affect their life after. The importance of this research lies not only in enhancing player safety but also in advancing the broader understanding of injury prevention in contact sports.
+In the realm of professional sports, particularly within the National Football League (NFL), injuries are an inevitable consequence of high-impact and physically demanding activities. The incidence and severity of these injuries not only affect player health and career longevity but also influence team dynamics and league operations. This study focuses on a comprehensive analysis of various factors that might contribute to the occurrence and nature of injuries, specifically lower body extremities, in the NFL, aiming to identify patterns and potential preventative measures. By identifying the preventative measures, athletes can worry less about how injuries during their career will affect their life after. The importance of this research lies not only in enhancing player safety but also in advancing the broader understanding of injury prevention in contact sports.
 
-Prior research in sports medicine and athletic injuries has primarily focused on immediate causes and rehabilitation of injuries. Within the NFL, the annual health and safety reports provide aggregate data on injury types and frequencies, which serve as a baseline for this study. However, there is a lack of comprehensive analysis that integrates environmental conditions, play strategies, and player-specific variables to predict and analyze injury occurrences comprehensively. There is also research on how the surface type affects the frequency in lower extremity injuries. The results from @Mack2018 show a positive correlation between the two factors. Notably, there was a 16% increase in lower extremity injuries on synthetic fields. @Haider2018 did another study on concussions and how it was affected by environmental factors. Although not related to this paper, it highlights the idea that environmental factors such as temperature and weather are impactful in regards to injuries.
+Prior research in sports medicine and athletic injuries has primarily focused on immediate causes and rehabilitation of injuries. Within the NFL, the annual health and safety reports provide aggregate data on injury types and frequencies, which serve as a baseline for this study. However, there is a lack of comprehensive analysis that integrates environmental conditions, play strategies, and player-specific variables to predict and analyze injury occurrences comprehensively. There is also research on how the surface type affects the frequency in lower extremity injuries. The results from @Mack2018 show a positive correlation between the two factors. Notably, there was a 16% increase in lower extremity injuries on synthetic fields. Mack also mentions that there is a higher injury rate on synthetic turf when restricted to noncontact injuries. @Haider2018 did another study on concussions and how it was affected by environmental factors. Although not related to this paper, it highlights the idea that environmental factors such as temperature and weather are impactful in regards to injuries. With different weather conditions, it impacts the grip athletes have on the field. In turn, when there is less grip, there is a higher chance of slippage and injury. 
 
-While existing studies have laid a solid foundation in understanding the factors influencing sports injuries, gaps remain in the holistic analysis of how combined factors like weather conditions, playing surface type, player position, and specific play scenarios contribute to the risk and nature of injuries. Most studies have not fully utilized the granular data now available through player tracking technologies and detailed game logs, which can offer deeper insights into the conditions under which injuries most frequently occur.
+While existing studies have laid a solid foundation in understanding the factors influencing sports injuries,
+many focus on the most frequent injuries: concussions. The NFL and many helmet companies have enhanced technology used within helmets and the studies [@Mack2021] show that there is a decrease in concussion incidence. This does not remove the fact that concussions have been frequent since the beginning of American football and the most frequent injury as of recent. Studies have not considered combined factors like weather conditions, surface type, player position, and specific play scenarios and their contribution to the risk and nature of injuries. Most studies have not fully utilized the data available through player tracking technologies and detailed game logs, which offer deeper insights into the conditions under which injuries most frequently occur.
 
 This paper contributes to the existing literature by employing statistical techniques to analyze a unique dataset combining player injury records, play-by-play data, and environmental conditions. By examining the frequency of lower extremity injuries, it may support the claims of prior research. By doing so, it aims to:
 
@@ -61,7 +62,7 @@ This paper contributes to the existing literature by employing statistical techn
 The remainder of this paper is structured as follows:
 
 1. Data Description and Cleaning: This section details the datasets used, sources, variables of interest, and the nature of the data. If there are irrelevant variables or emptiness, it will be removed or filled in.
-2. Research Design and Methods: Here, the statistical methods applied in the analysis, such as logistic regression and ANOVA, are discussed along with the rationale behind their use.
+2. Research Design and Methods: Here, the statistical methods applied in the analysis, such as logistic regression and data visualization, are discussed along with the rationale behind their use.
 3. Results: This section presents the findings of the study, discussing how various factors correlate with injury occurrences and their implications.
 4. Discussion: Insights and interpretations of the results are discussed, along with their implications for injury prevention strategies in the NFL.
 5. Conclusion: The paper concludes with a summary of the findings and their contributions to sports injury research and practice, along with suggestions for future research.
@@ -74,13 +75,11 @@ This data is integral to analyzing the occurrence and nature of injuries in the 
 
 Preliminary exploratory analysis would involve:
 
-+ Descriptive statistics to summarize the data, such as average injury durations, frequency of injuries by body part, and common player positions associated with injuries.
-+ Visualization techniques, including heatmaps of injuries by field type and line graphs of injury occurrences over time.
++ Descriptive statistics to summarize the data, such as the injury counts by body part and the count of games played for each different sruface type.
++ Visualization techniques, including heatmaps of injuries by roster position and bar charts to visualize the frequency of injuries by surface type.
 + Correlation matrices to identify potential relationships between variables such as weather conditions and injury rates.
 
-This structured approach will guide readers through the foundational data used in the study, establishing the groundwork for more detailed statistical analysis and interpretation in subsequent sections of your paper.
-
-Data cleaning is a necessary step to examine whether or not there is incomplete data. 
+Before starting any statistical analysis, data cleaning is a necessary step to examine whether or not there is incomplete data. If the data is missing or incorrect, it will lead to misinterpretations and the methods may not return the correct result.
 
 ```{python}
 # Load the datasets
@@ -128,7 +127,7 @@ missing_data_summary.index.name = 'File Name'
 print(missing_data_summary)
 ```
 
-From `InjuryRecord.csv`, there are only 28 values missing in the `PlayKey` column from the original 105. At 27%, there is a significant amount of missing data entries. However, it would be difficult to fill in the missing entries without using an external dataset. This variable is also within the `PlayList.csv` file so it can be used to fill in the data in `InjuryRecord.csv` (if applicable). In `PlayList.csv`, 13% of the data is missing, mainly in `StadiumType`, `Weather`, and `PlayType`. Similar to before, it is difficult to fill in data without an external resource. For now, the models and analysis will use the data available in the files.
+From `InjuryRecord.csv`, there are only 28 values missing in the `PlayKey` column from the original 105. At 27%, there is a significant amount of missing data entries. It would be difficult to fill in the missing entries with the exact playkey without web scraping or using an external resource. The missing entries can temporarily be filled in by adding "-1" to the `GameID`. Because it is a unique identifier, it would not affect our overall analysis as the surface type, weather, temperature and other conditions should remain the same for each ID. This allows us to locate the data between each file and determine which factors contribute to the analysis regarding injuries. In `PlayList.csv`, 13% of the data is missing, mainly in `StadiumType`, `Weather`, and `PlayType`. Similar to before, it is difficult to fill in data without an external resource. For now, the models and analysis will use the data available in the files.
 
 ```{python}
 # Fill missing 'PlayKey' values with 'GameID' concatenated with '-1'
@@ -141,8 +140,6 @@ injury['PlayKey'] = injury.apply(
 injury.to_csv('data/mod_InjuryRecord.csv', index=False)
 ```
 
-For the missing entries in `InjuryRecord.csv`, we can fill in the missing data by formatting the missing values based on the `GameID`. This step allows us to locate the data between each file and determine important factors that contribute to injuries.
-
 ```{python}
 # Bar chart for frequency of stadium types in PlayList
 stadium_freq = plays['StadiumType'].value_counts()
@@ -154,7 +151,7 @@ plt.ylabel('Frequency')
 plt.show()
 ```
 
-This graph models all of the different stadium types that are in the file. Notice how there are many repeats that can be combined. In order to reduce repetitiveness, these values can be cleaned by combining like-values.
+This graph models all of the different stadium types that are in the file. Initial observations show that the data has flaws. There are many entries that can be combined into one general category. This is done in order to reduce repetitiveness. The data from the two seasons also highlights the fact that majority of games are played in outdoor stadiums. These stadiums are subject to a variety of weather conditions such as rain, snow, wind, and many more. This makes injury analysis more complicated to assess because of the number of factors that need to be considered.
 
 ```{python}
 # A quick view at the 'StadiumType' unique values to understand the variations
@@ -252,7 +249,9 @@ plays.to_csv('data/mod_PlayList.csv', index=False)
 
 # Modeling
 
-From the collected the data, it is important to visualize the occurrences of injuries, especially the type and by the position. Below is a heat map that shows how many injury occurrences there are based on position. In terms of the most frequent injuries, there are many `Ankle` and `Knee` injuries, specifically in the `Linebacker` and `Wide Receiver` position groups. `Toes` tend to be the least frequent, with this data set only having one instance. This heatmap shows that with the playstyle of the sport, injured players tend to have knee and ankle issues. 
+From the collected the data, it is important to visualize the occurrences of injuries, especially the type and by the position. Below is a heat map that shows how many injury occurrences there are based on position. In terms of the most frequent injuries, there are many `Ankle` and `Knee` injuries, specifically in the `Linebacker` and `Wide Receiver` position groups. `Toes` tend to be the least frequent, with this data set only having one instance. This heatmap shows that with the playstyle of the sport, injured players tend to have knee and ankle issues. These position groups, which may include `Safety` and `Cornerback`, tend to change directions a lot. Whether it is back pedalling or quickly planting their foot to make a sharp turn, these movements are crucial to why these specific groups have the most injuries in the respective category. As the size of the athlete increases, notably `Offensive/Defensive Lineman`, there are not many injuries that occurred in the lower body. From their playstyle, these athletes are often in place and not traveling at high rates of speed. If an ACL [^longnote] or Achilles Tendon is torn, it is merely off chance or may be due to their previous injuries.
+
+[^longnote]: Anterior cruciate ligament; located in the knee joint.
 
 ```{python}
 # Merge injury_record and playlist on PlayerKey
@@ -323,9 +322,7 @@ plt.show()
 ```
 
 
-The comparison of injury occurrence and the type of playing surface presents a significant finding in the data. There's a higher rate of injuries reported on synthetic surfaces at 54.29%, despite more games being played on natural grass, which hosts 57.97% of games. This discrepancy suggests that synthetic surfaces may carry a higher risk of injury compared to natural grass. This data can inform decisions about player safety and surface selection, potentially leading to considerations for the use of natural grass to reduce injury rates.
-
-Given this data, it appears that the type of playing surface may be a significant contributing factor to injury risks in sports, particularly affecting players in positions that require dynamic movements such as sudden turns and sprints. These insights can inform decisions regarding player training, game scheduling, and perhaps the selection or maintenance of playing surfaces to mitigate injury risks. Further research may be warranted to explore the causative factors behind these observations and to develop strategies for injury prevention.
+The comparison of injury occurrence and the type of playing surface presents a significant finding in the data. There's a higher rate of injuries reported on synthetic surfaces at 54.29%, despite more games being played on natural grass, which hosts 57.97% of games. This discrepancy suggests that synthetic surfaces may carry a higher risk of injury compared to natural grass. This data can inform decisions about player safety and surface selection, potentially leading to considerations for the use of natural grass to reduce injury rates. The type of playing surface also plays a factor to injury risk, particularly affecting players in positions that require dynamic movements such as sudden turns and sprints. These insights can inform decisions regarding player training, game scheduling, and perhaps the selection or maintenance of playing surfaces to mitigate injury risks. Each surface type has their own benefits and negatives. Natural grass is less injury prone but costly to maintain. Synthetic turf is easier to maintain but comes at the cost of injury risk. In the 2023 season, Aaron Rodgers suffered a torn Achilles in the first game for the New York Jets [@DeArdo2023]. In only four snaps, Rodgers had his season ended due to a lower extremity injury. And what was the stadium type? Synthetic turf. This injury was a shocker but can be expected as there have been complaints about the field (specfically MetLife Stadium). 
 
 ```{python}
 # To reflect the correct recovery time, we need to adjust the data.
@@ -394,8 +391,6 @@ The data suggests that knee and ankle injuries are not only frequent but also of
 
 # Methods
 
-**Injury Occurrence based on Surface Type**
-
 ```{python}
 # Create a set of unique keys from InjuryRecord which indicates injuries
 injury_keys = set(new_injury['PlayKey'])
@@ -412,17 +407,9 @@ else:
 
     # Perform the Chi-Square test
     chi2, p, dof, expected = chi2_contingency(contingency_table)
-
-    print(f"Chi-Square Statistic: {chi2:.3f}, p-value: {p:.3f}")
 ```
 
-The methods section details a statistical approach to establish a correlation between the type of playing surface and the occurrence of injuries. A binary variable is created within the plays dataset to indicate the occurrence of an injury, with each play cross-referenced against a set of unique injury identifiers from the new_injury dataset.
-
-Following this, a contingency table is constructed to tabulate the frequency of injuries against each type of playing surface, as recorded in the plays dataset. A Chi-Square test of independence is then applied to this contingency table to evaluate if there is a statistically significant association between playing surface type and injury occurrence.
-
-The Chi-Square statistic and corresponding p-value are critical in this analysis. If the p-value is found to be less than a commonly accepted threshold (e.g., 0.05), the null hypothesis — which assumes no relationship between surface type and injury occurrence — is rejected. This suggests that the surface type may indeed play a role in injury risk, an insight that could be instrumental in shaping preventative measures in sports environments.
-
-**Weather conditions across different injury types**
+This section details a statistical approach to establish a correlation between the type of playing surface and the occurrence of injuries. A binary variable is created in `PlayList.csv` to indicate the occurrence of an injury, with each play cross-referenced against a set of unique injury identifiers from the new_injury dataset. The first method used was a Chi-squared test to test if there is a relation between injury occurrence and surface type. From this test, we get a test value of 6.316 and a p-value of 0.012. If we use $\alpha$ = 0.05, we can say that there is a significant association between the type of surface and injury occurrence. This also supports the previous chart where synthetic turf resulted in more injuries. 
 
 ```{python}
 # Prepare the data for chi-square test on weather and injury types
@@ -436,10 +423,10 @@ contingency_weather_injury = pd.crosstab(weather_injury_data['Weather'], weather
 chi2_weather_injury, p_value_weather_injury, dof_weather_injury, expected_weather_injury = chi2_contingency(contingency_weather_injury)
 
 # Display the chi-square test results and the contingency table (if small enough)
-contingency_weather_injury.shape, (chi2_weather_injury, p_value_weather_injury)
+#contingency_weather_injury.shape, (chi2_weather_injury, p_value_weather_injury)
 ```
 
-The Chi-Square test conducted on the contingency table of weather conditions and body parts injured returned a non-significant result, indicating no strong evidence of an association between the two variables within the dataset analyzed. The shape of the contingency table and the values of the Chi-Square statistic and p-value suggest that variations in weather do not statistically affect the likelihood of different types of injuries occurring. This analysis supports the conclusion that, at least in this data set, weather conditions do not appear to be a significant factor in the occurrence of injuries to specific body parts.
+The Chi-Square test was also conducted on the contingency table of weather conditions and body parts injured returned a non-significant result (p-value = 0.62), indicating no strong evidence of an association between the two variables within the dataset analyzed. The shape of the contingency table and the values of the Chi-Square statistic and p-value suggest that variations in weather do not statistically affect the likelihood of different types of injuries occurring. This analysis supports the conclusion that, at least in this data set, weather conditions do not appear to be a significant factor in the occurrence of injuries to specific body parts.
 
 **Temperature vs. injury occurrence**
 
